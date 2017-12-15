@@ -1,12 +1,16 @@
-name: "my-website"
+name: my-website
 navbar:
-  title: "My Website"
+  title: My Website
   left:
-    - text: "Home"
-      href: index.html
-    - text: "About"
-      href: about.html
+  - text: Home
+    href: index.html
+  - text: About
+    href: about.html
 output:
- html_document:
-  theme: cosmo
-  Highlight: textmate
+  html_document:
+    theme: cosmo
+    Highlight: textmate
+    lib_dir: site_libs
+    self_contained: no
+output_dir: _site
+

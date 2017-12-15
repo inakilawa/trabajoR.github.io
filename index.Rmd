@@ -44,7 +44,7 @@ colnames(integrity)=colnames(airbnb)
 integrity
 ```
 
-####Sustituimos los NA por la media
+####Sustituimos los NA de la columna bethrooms por la media
 
 ```{r valoresNAS, echo=TRUE}
 bath_vec=is.na(airbnb$bathrooms)
@@ -63,11 +63,11 @@ colnames(integrity1)=colnames(airbnb)
 integrity1
 
 ```
-####En la columna Bedrooms vemos que han desaparecido los NA
+####En la columna Bathrooms vemos que han desaparecido los NA
 
 ##2. Realiza un resumen de los ficheros importados en funcion del barrio
 
-#### Creamos el data frame y los vectores 
+#### Creamos el data frame ,los vectores y la función para obtener el crimen más frecuente.
 ```{r summary}
 datasummary<-data.frame(unique(airbnb$borough))
 colnames(datasummary)<-c("Borough")
@@ -105,7 +105,7 @@ getMostFrecuentCrime<-function(aux2){
 ```
 
 
-#### Generamos y asignamos los vectores
+#### Generamos, adaptamos y asignamos los vectores
 
 ```{r vectores}
 for(i in 1:nrow(datasummary)){
@@ -142,9 +142,9 @@ datasummary$MaxValue<-maxvls
 head(datasummary,10)
 ```
 
-## 3. Hay valores atipicos en el número de habitaciones? 
+## 3. ¿Hay valores atípicos en el número de precio o habitaciones? 
 ####¿Qué medidas estadisticas son adecuadas en este caso?
-####Calcula la media/mediana y la desviación tipica/rango intercuartilico.
+####Calcula la media, mediana, la desviación tipica y el rango intercuartilico.
 
 ```{r medias, warning=FALSE}
 mean(airbnb$price,na.rm=TRUE)
@@ -152,7 +152,7 @@ median(airbnb$price,na.rm=TRUE)
 sd(airbnb$price,na.rm=TRUE)
 quan=quantile(airbnb$price ,probs = seq(0, 1, 0.25), na.rm = TRUE)
 interquart=quan[4]-quan[2]
-interquart
+as.numeric(interquart)
 graph1=ggplot(airbnb[airbnb$price<500,],aes(x=room_type,y=price,fill=room_type,na.rm=T))+geom_boxplot(na.rm = T) +facet_wrap(~overall_satisfaction)
 graph1
 ```

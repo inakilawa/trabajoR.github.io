@@ -253,8 +253,8 @@ integrity</code></pre>
 ##   latitude longitude collected
 ## 1        0         0         0</code></pre>
 </div>
-<div id="sustituimos-los-na-por-la-media" class="section level4">
-<h4>Sustituimos los NA por la media</h4>
+<div id="sustituimos-los-na-de-la-columna-bethrooms-por-la-media" class="section level4">
+<h4>Sustituimos los NA de la columna bethrooms por la media</h4>
 <pre class="r"><code>bath_vec=is.na(airbnb$bathrooms)
 bath_mean=mean(airbnb[bath_vec==F,]$bathrooms)
 airbnb[bath_vec==T,]$bathrooms=round(bath_mean,0)
@@ -276,14 +276,14 @@ integrity1</code></pre>
 ##   latitude longitude collected
 ## 1        0         0         0</code></pre>
 </div>
-<div id="en-la-columna-bedrooms-vemos-que-han-desaparecido-los-na" class="section level4">
-<h4>En la columna Bedrooms vemos que han desaparecido los NA</h4>
+<div id="en-la-columna-bathrooms-vemos-que-han-desaparecido-los-na" class="section level4">
+<h4>En la columna Bathrooms vemos que han desaparecido los NA</h4>
 </div>
 </div>
 <div id="realiza-un-resumen-de-los-ficheros-importados-en-funcion-del-barrio" class="section level2">
 <h2>2. Realiza un resumen de los ficheros importados en funcion del barrio</h2>
-<div id="creamos-el-data-frame-y-los-vectores" class="section level4">
-<h4>Creamos el data frame y los vectores</h4>
+<div id="creamos-el-data-frame-los-vectores-y-la-funcion-para-obtener-el-crimen-mas-frecuente." class="section level4">
+<h4>Creamos el data frame ,los vectores y la función para obtener el crimen más frecuente.</h4>
 <pre class="r"><code>datasummary&lt;-data.frame(unique(airbnb$borough))
 colnames(datasummary)&lt;-c(&quot;Borough&quot;)
 long&lt;-c()
@@ -317,8 +317,8 @@ getMostFrecuentCrime&lt;-function(aux2){
   return(as.character(mfc))
 }</code></pre>
 </div>
-<div id="generamos-y-asignamos-los-vectores" class="section level4">
-<h4>Generamos y asignamos los vectores</h4>
+<div id="generamos-adaptamos-y-asignamos-los-vectores" class="section level4">
+<h4>Generamos, adaptamos y asignamos los vectores</h4>
 <pre class="r"><code>for(i in 1:nrow(datasummary)){
   long[i]&lt;-mean(airbnb[airbnb$borough==datasummary$Borough[i],]$long)
   lat[i]&lt;- mean(airbnb[airbnb$borough==datasummary$Borough[i],]$lat)
@@ -386,13 +386,13 @@ head(datasummary,10)</code></pre>
 ## 10        0       37</code></pre>
 </div>
 </div>
-<div id="hay-valores-atipicos-en-el-numero-de-habitaciones" class="section level2">
-<h2>3. Hay valores atipicos en el número de habitaciones?</h2>
+<div id="hay-valores-atipicos-en-el-numero-de-precio-o-habitaciones" class="section level2">
+<h2>3. ¿Hay valores atípicos en el número de precio o habitaciones?</h2>
 <div id="que-medidas-estadisticas-son-adecuadas-en-este-caso" class="section level4">
 <h4>¿Qué medidas estadisticas son adecuadas en este caso?</h4>
 </div>
-<div id="calcula-la-mediamediana-y-la-desviacion-tipicarango-intercuartilico." class="section level4">
-<h4>Calcula la media/mediana y la desviación tipica/rango intercuartilico.</h4>
+<div id="calcula-la-media-mediana-la-desviacion-tipica-y-el-rango-intercuartilico." class="section level4">
+<h4>Calcula la media, mediana, la desviación tipica y el rango intercuartilico.</h4>
 <pre class="r"><code>mean(airbnb$price,na.rm=TRUE)</code></pre>
 <pre><code>## [1] 146.8562</code></pre>
 <pre class="r"><code>median(airbnb$price,na.rm=TRUE)</code></pre>
@@ -401,9 +401,8 @@ head(datasummary,10)</code></pre>
 <pre><code>## [1] 151.5594</code></pre>
 <pre class="r"><code>quan=quantile(airbnb$price ,probs = seq(0, 1, 0.25), na.rm = TRUE)
 interquart=quan[4]-quan[2]
-interquart</code></pre>
-<pre><code>## 75% 
-## 108</code></pre>
+as.numeric(interquart)</code></pre>
+<pre><code>## [1] 108</code></pre>
 <pre class="r"><code>graph1=ggplot(airbnb[airbnb$price&lt;500,],aes(x=room_type,y=price,fill=room_type,na.rm=T))+geom_boxplot(na.rm = T) +facet_wrap(~overall_satisfaction)
 graph1</code></pre>
 <p><img src="index_files/figure-html/medias-1.png" width="672" /></p>
@@ -416,6 +415,10 @@ graph1</code></pre>
 <pre><code>## [1] 1</code></pre>
 <pre class="r"><code>sd(airbnb$bedrooms,na.rm=TRUE)</code></pre>
 <pre><code>## [1] 0.8014457</code></pre>
+<pre class="r"><code>quan1=quantile(airbnb$bedrooms ,probs = seq(0, 1, 0.25), na.rm = TRUE)
+interquart1=quan1[4]-quan1[2]
+as.numeric(interquart1)</code></pre>
+<pre><code>## [1] 1</code></pre>
 </div>
 </div>
 <div id="hay-relacion-entre-el-numero-de-habitaciones-y-el-precio-depende-el-precio-del-barrio" class="section level2">
@@ -424,18 +427,18 @@ graph1</code></pre>
 <h3>RESPUESTAS:</h3>
 <div id="en-primer-lugar-realizaremos-anova-sobre-las-variables-habitaciones-y-precio-ya-que-hay-mas-de-dos-subpoblaciones" class="section level4">
 <h4>En primer lugar realizaremos ANOVA sobre las variables habitaciones y precio ya que hay más de dos subpoblaciones:</h4>
-<pre class="r"><code>anova=aov(bedrooms ~ price, data=airbnb)
+<pre class="r"><code>anova=aov(price ~ bedrooms, data=airbnb)
 graph10=ggplot(airbnb, aes(x = bedrooms, y = price, color=borough)) + geom_point()
 anova</code></pre>
 <pre><code>## Call:
-##    aov(formula = bedrooms ~ price, data = airbnb)
+##    aov(formula = price ~ bedrooms, data = airbnb)
 ## 
 ## Terms:
-##                     price Residuals
-## Sum of Squares   5779.443 16236.552
+##                  bedrooms Residuals
+## Sum of Squares  206995948 581526716
 ## Deg. of Freedom         1     34275
 ## 
-## Residual standard error: 0.6882689
+## Residual standard error: 130.2555
 ## Estimated effects may be unbalanced
 ## 137 observations deleted due to missingness</code></pre>
 <pre class="r"><code>graph10</code></pre>
