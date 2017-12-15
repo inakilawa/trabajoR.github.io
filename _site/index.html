@@ -11,7 +11,7 @@
 
 
 
-<title>Homepage</title>
+<title>Trabajo en R</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -195,15 +195,28 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Homepage</h1>
+<h1 class="title toc-ignore">Trabajo en R</h1>
 
 </div>
 
 
-<div id="r-markdown" class="section level2">
-<h2>R Markdown</h2>
-<p>This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
-<p>When you click the <strong>Knit</strong> button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</p>
+<div id="introduccion" class="section level2">
+<h2>Introducción</h2>
+<div id="en-la-siguiente-pagina-vamos-a-mostrar-el-trabajo-realizado-por-eneko-alvaro-e-inaki-del-grupo-1." class="section level4">
+<h4>En la siguiente página vamos a mostrar el trabajo realizado por Eneko, Alvaro e Iñaki del Grupo 1.</h4>
+</div>
+<div id="los-objetivos-planteados-son" class="section level4">
+<h4>Los objetivos planteados son:</h4>
+<ul>
+<li>6 Graficos</li>
+<li>Un contraste de hipotesis</li>
+<li>2 analisis numericos</li>
+<li>1 nuevo grafico</li>
+</ul>
+</div>
+</div>
+<div id="comenzamos-por-importar-todas-las-librerias-y-archivos-necesarios" class="section level2">
+<h2>Comenzamos por importar todas las librerias y archivos necesarios</h2>
 <pre class="r"><code>library(readxl)
 library(ggplot2)
 library(ggmap)
@@ -217,11 +230,372 @@ crimedata=read.csv(&quot;crimedata_london.csv&quot;, header=TRUE)
 airbnb=read.csv(&quot;airbnb_london.csv&quot;, header=TRUE)
 unemp=read.csv(&quot;unemployment_london2.csv&quot;, header=TRUE)</code></pre>
 </div>
-<div id="including-plots" class="section level2">
-<h2>Including Plots</h2>
-<p>You can also embed plots, for example:</p>
-<p><img src="index_files/figure-html/pressure-1.png" width="672" /></p>
-<p>Note that the <code>echo = FALSE</code> parameter was added to the code chunk to prevent printing of the R code that generated the plot.</p>
+<div id="comprueba-si-la-integridad-de-los-valores-de-la-tabla." class="section level2">
+<h2>1. Comprueba si la integridad de los valores de la tabla.</h2>
+<div id="cuantos-valores-faltan-en-cada-columna" class="section level4">
+<h4>Cuantos valores faltan en cada columna?</h4>
+</div>
+<div id="completa-de-valores-una-de-la-columnas-con-nas" class="section level4">
+<h4>Completa de valores una de la columnas con NAs</h4>
+<pre class="r"><code>integrity= data.frame()
+for(i in 1:ncol(airbnb)){
+  vec_aux=c()
+  vec_aux=is.na(airbnb[,i])
+  count=sum(vec_aux)
+  integrity[1,i]=count
+} 
+colnames(integrity)=colnames(airbnb)
+integrity</code></pre>
+<pre><code>##   X room_id host_id room_type borough neighborhood reviews
+## 1 0       0      15         0       0            0       0
+##   overall_satisfaction accommodates bedrooms bathrooms price minstay
+## 1                10863         4293      137      3943     0     998
+##   latitude longitude collected
+## 1        0         0         0</code></pre>
+</div>
+<div id="sustituimos-los-na-por-la-media" class="section level4">
+<h4>Sustituimos los NA por la media</h4>
+<pre class="r"><code>bath_vec=is.na(airbnb$bathrooms)
+bath_mean=mean(airbnb[bath_vec==F,]$bathrooms)
+airbnb[bath_vec==T,]$bathrooms=round(bath_mean,0)
+
+integrity1= data.frame()
+for(i in 1:ncol(airbnb)){
+  vec_aux=c()
+  vec_aux=is.na(airbnb[,i])
+  count=sum(vec_aux)
+  integrity1[1,i]=count
+}
+colnames(integrity1)=colnames(airbnb)
+
+integrity1</code></pre>
+<pre><code>##   X room_id host_id room_type borough neighborhood reviews
+## 1 0       0      15         0       0            0       0
+##   overall_satisfaction accommodates bedrooms bathrooms price minstay
+## 1                10863         4293      137         0     0     998
+##   latitude longitude collected
+## 1        0         0         0</code></pre>
+</div>
+<div id="en-la-columna-bedrooms-vemos-que-han-desaparecido-los-na" class="section level4">
+<h4>En la columna Bedrooms vemos que han desaparecido los NA</h4>
+</div>
+</div>
+<div id="realiza-un-resumen-de-los-ficheros-importados-en-funcion-del-barrio" class="section level2">
+<h2>2. Realiza un resumen de los ficheros importados en funcion del barrio</h2>
+<div id="creamos-el-data-frame-y-los-vectores" class="section level4">
+<h4>Creamos el data frame y los vectores</h4>
+<pre class="r"><code>datasummary&lt;-data.frame(unique(airbnb$borough))
+colnames(datasummary)&lt;-c(&quot;Borough&quot;)
+long&lt;-c()
+lat&lt;-c()
+totflats&lt;-c()
+avgprice&lt;-c()
+unemp11&lt;-c()
+unemp14&lt;-c()
+totcrimes&lt;-c()
+lyearcrimes&lt;-c()
+avgyearcrimes&lt;-c()
+mfcrime&lt;-c()
+avgvls&lt;-c()
+minvls&lt;-c()
+maxvls&lt;-c()
+
+unemp$Borough=as.character(unemp$Borough)
+flats=data.frame(table(airbnb$borough))
+colnames(flats)=c(&quot;borough&quot;,&quot;Freq&quot;)
+
+getMostFrecuentCrime&lt;-function(aux2){
+  aux2=data.frame(table(aux2$major_category))
+  max=0
+  mfc=&quot;&quot;
+  for(j in 1:nrow(aux2)){
+    if(aux2[j,2]&gt;max){
+      mfc=aux2[j,1]
+      max=aux2[j,2]
+    }
+  }
+  return(as.character(mfc))
+}</code></pre>
+</div>
+<div id="generamos-y-asignamos-los-vectores" class="section level4">
+<h4>Generamos y asignamos los vectores</h4>
+<pre class="r"><code>for(i in 1:nrow(datasummary)){
+  long[i]&lt;-mean(airbnb[airbnb$borough==datasummary$Borough[i],]$long)
+  lat[i]&lt;- mean(airbnb[airbnb$borough==datasummary$Borough[i],]$lat)
+  totflats[i]&lt;-flats[flats$borough==datasummary$Borough[i],]$Freq
+  avgprice[i]&lt;-round(mean(airbnb[airbnb$borough==datasummary$Borough[i],]$price),2)
+  unemp11[i]&lt;-mean(unemp[unemp$Borough==datasummary$Borough[i],]$X2011.2013)
+  unemp14[i]&lt;-mean(unemp[unemp$Borough==datasummary$Borough[i],]$X2014.2016)
+  aux=crimedata[crimedata$borough==datasummary$Borough[i],]
+  totcrimes[i]=nrow(aux)
+  lyearcrimes[i]=nrow(aux[aux$year==2016,])
+  avgyearcrimes[i]=round(nrow(aux)/length(unique(aux$year)),0)
+  mfcrime[i]=getMostFrecuentCrime(aux)
+  avgvls[i]=round(mean(aux$value, na.rm=TRUE),3)
+  minvls[i]=min(aux$value,na.rm = TRUE)
+  maxvls[i]=max(aux$value, na.rm = TRUE)
+}
+
+datasummary$Longitude&lt;-long
+datasummary$Latitude&lt;-lat
+datasummary$Flats&lt;-totflats
+datasummary$AvgPrice&lt;-avgprice
+datasummary$Unemp11&lt;-unemp11
+datasummary$Unemp14&lt;-unemp14
+datasummary$TotalCrimes&lt;-totcrimes
+datasummary$LastCrimes&lt;-lyearcrimes
+datasummary$AvgCrimes&lt;-avgyearcrimes
+datasummary$MostFrecCrime&lt;-mfcrime
+datasummary$AvgValue&lt;-avgvls
+datasummary$MinValue&lt;-minvls
+datasummary$MaxValue&lt;-maxvls
+
+head(datasummary,10)</code></pre>
+<pre><code>##                   Borough   Longitude Latitude Flats AvgPrice Unemp11
+## 1                 Croydon -0.09322810 51.38494   319    85.78     8.4
+## 2  Kensington and Chelsea -0.19224354 51.50040  2547   222.38     4.4
+## 3                Haringey -0.10655531 51.58616   976    94.02     6.8
+## 4                  Ealing -0.29422467 51.51245   663   113.36     8.8
+## 5                 Lambeth -0.11955976 51.46462  2114   125.11     8.2
+## 6               Islington -0.10724836 51.54226  2182   148.99     7.0
+## 7  Hammersmith and Fulham -0.21561726 51.49057  1863   155.87     5.7
+## 8    Richmond upon Thames -0.31023548 51.45363   642   169.55     3.4
+## 9              Wandsworth -0.17604452 51.45773  1540   141.53     6.3
+## 10          Tower Hamlets -0.04729806 51.51806  3562   121.14     9.2
+##    Unemp14 TotalCrimes LastCrimes AvgCrimes      MostFrecCrime AvgValue
+## 1      4.7        5945        672       661 Theft and Handling    0.474
+## 2      4.8        2971        341       330 Theft and Handling    0.536
+## 3      4.7        4170        436       463 Theft and Handling    0.532
+## 4      5.1        5531        593       615 Theft and Handling    0.462
+## 5      5.1        5211        602       579 Theft and Handling    0.564
+## 6      4.6        3560        390       396 Theft and Handling    0.647
+## 7      3.5        3215        345       357 Theft and Handling    0.533
+## 8      4.0        3055        342       339 Theft and Handling    0.325
+## 9      3.5        5058        573       562 Theft and Handling    0.452
+## 10     7.7        4020        449       447 Theft and Handling    0.579
+##    MinValue MaxValue
+## 1         0       38
+## 2         0       23
+## 3         0       20
+## 4         0       24
+## 5         0       38
+## 6         0       39
+## 7         0       57
+## 8         0       21
+## 9         0       22
+## 10        0       37</code></pre>
+</div>
+</div>
+<div id="hay-valores-atipicos-en-el-numero-de-habitaciones" class="section level2">
+<h2>3. Hay valores atipicos en el número de habitaciones?</h2>
+<div id="que-medidas-estadisticas-son-adecuadas-en-este-caso" class="section level4">
+<h4>¿Qué medidas estadisticas son adecuadas en este caso?</h4>
+</div>
+<div id="calcula-la-mediamediana-y-la-desviacion-tipicarango-intercuartilico." class="section level4">
+<h4>Calcula la media/mediana y la desviación tipica/rango intercuartilico.</h4>
+<pre class="r"><code>mean(airbnb$price,na.rm=TRUE)</code></pre>
+<pre><code>## [1] 146.8562</code></pre>
+<pre class="r"><code>median(airbnb$price,na.rm=TRUE)</code></pre>
+<pre><code>## [1] 113</code></pre>
+<pre class="r"><code>sd(airbnb$price,na.rm=TRUE)</code></pre>
+<pre><code>## [1] 151.5594</code></pre>
+<pre class="r"><code>quan=quantile(airbnb$price ,probs = seq(0, 1, 0.25), na.rm = TRUE)
+interquart=quan[4]-quan[2]
+interquart</code></pre>
+<pre><code>## 75% 
+## 108</code></pre>
+<pre class="r"><code>graph1=ggplot(airbnb[airbnb$price&lt;500,],aes(x=room_type,y=price,fill=room_type,na.rm=T))+geom_boxplot(na.rm = T) +facet_wrap(~overall_satisfaction)
+graph1</code></pre>
+<p><img src="index_files/figure-html/medias-1.png" width="672" /></p>
+</div>
+<div id="no-parece-haber-valores-atipicos.-por-tanto-vamos-a-calcular-la-media-de-habitaciones-y-la-desviacion-tipica" class="section level4">
+<h4>No parece haber valores atipicos. Por tanto, vamos a calcular la media de habitaciones y la desviación tipica:</h4>
+<pre class="r"><code>mean(airbnb$bedrooms,na.rm=TRUE)</code></pre>
+<pre><code>## [1] 1.343525</code></pre>
+<pre class="r"><code>median(airbnb$bedrooms,na.rm=TRUE)</code></pre>
+<pre><code>## [1] 1</code></pre>
+<pre class="r"><code>sd(airbnb$bedrooms,na.rm=TRUE)</code></pre>
+<pre><code>## [1] 0.8014457</code></pre>
+</div>
+</div>
+<div id="hay-relacion-entre-el-numero-de-habitaciones-y-el-precio-depende-el-precio-del-barrio" class="section level2">
+<h2>4. Hay relación entre el número de habitaciones y el precio? ¿Depende el precio del barrio?</h2>
+<div id="respuestas" class="section level3">
+<h3>RESPUESTAS:</h3>
+<div id="en-primer-lugar-realizaremos-anova-sobre-las-variables-habitaciones-y-precio-ya-que-hay-mas-de-dos-subpoblaciones" class="section level4">
+<h4>En primer lugar realizaremos ANOVA sobre las variables habitaciones y precio ya que hay más de dos subpoblaciones:</h4>
+<pre class="r"><code>anova=aov(bedrooms ~ price, data=airbnb)
+graph10=ggplot(airbnb, aes(x = bedrooms, y = price, color=borough)) + geom_point()
+anova</code></pre>
+<pre><code>## Call:
+##    aov(formula = bedrooms ~ price, data = airbnb)
+## 
+## Terms:
+##                     price Residuals
+## Sum of Squares   5779.443 16236.552
+## Deg. of Freedom         1     34275
+## 
+## Residual standard error: 0.6882689
+## Estimated effects may be unbalanced
+## 137 observations deleted due to missingness</code></pre>
+<pre class="r"><code>graph10</code></pre>
+<p><img src="index_files/figure-html/aov-1.png" width="672" /></p>
+</div>
+</div>
+<div id="en-segundo-lugar-analicemos-los-barrios" class="section level3">
+<h3>En segundo lugar, analicemos los barrios:</h3>
+<div id="crearemos-2-funciones-para-chequear-la-normalidad-y-la-varianza" class="section level4">
+<h4>Crearemos 2 funciones para chequear la normalidad y la varianza</h4>
+<pre class="r"><code>check_norm&lt;- function(a){
+  b&lt;-shapiro.test(a)
+  return(b$p.value&gt;0.05)
+}
+
+check_var&lt;- function(a,b){
+  require(ggplot2)
+  c&lt;-data.frame(a,b)
+  d&lt;-bartlett.test(c)
+  return(d$p.value&gt;0.05)
+} 
+
+croydon&lt;-airbnb[airbnb$borough==&quot;Croydon&quot;,]
+check_norm(croydon$price)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>check_var(croydon$price,croydon$bedrooms)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+</div>
+<div id="despues-del-analisis-observamos-que-no-existe-normalidad-ni-la-varianza-aunque-esta-ultima-no-es-necesario-analizarla." class="section level4">
+<h4>Despues del análisis observamos que no existe normalidad ni la varianza, aunque esta última no es necesario analizarla.</h4>
+</div>
+<div id="como-los-precios-no-siguen-una-distribucion-normal-tenemos-que-utilizar-el-test-de-krusal-wallis" class="section level4">
+<h4>Como los precios no siguen una distribución normal tenemos que utilizar el test de Krusal-Wallis:</h4>
+<pre class="r"><code>kruskal.test(borough~price,airbnb)$p.value&gt;0.05</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+</div>
+<div id="y-nos-indica-que-no-hay-relacion-entre-el-precio-y-el-barrio" class="section level4">
+<h4>Y nos indica que NO hay relación entre el precio y el barrio</h4>
+</div>
+</div>
+</div>
+<div id="existe-relacion-entre-el-barrio-y-la-cantidad-de-habitaciones" class="section level2">
+<h2>5. ¿Existe relación entre el barrio y la cantidad de habitaciones?</h2>
+<div id="existe-relacion-entre-el-precio-medio-del-alquiler-en-un-barrio-y-la-cantidad-de-crmenes-en-el-mismo" class="section level4">
+<h4>¿Existe relación entre el precio medio del alquiler en un barrio y la cantidad de cr??menes en el mismo?</h4>
+</div>
+<div id="en-primer-lugar-miramos-que-barrios-hay-para-realizar-el-shapiro-test-individualmente.-todos-deben-seguiruna-distribucion-normal-en-sus-habitaciones.-si-no-deberemos-usar-krusal-wallis." class="section level4">
+<h4>En primer lugar miramos qué barrios hay, para realizar el Shapiro Test individualmente. Todos deben seguiruna distribución normal en sus habitaciones. Si no, deberemos usar Krusal-Wallis.</h4>
+<pre class="r"><code>check_norm(croydon$bedrooms)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+</div>
+<div id="no-sigue-una-distribucion-normal.-por-tanto-tenemos-que-utilizar-el-test-de-kruskal-wallis." class="section level4">
+<h4>No sigue una distribución normal. Por tanto tenemos que utilizar el test de Kruskal-Wallis.</h4>
+<pre class="r"><code>kruskal.test(borough~bedrooms,airbnb)$p.value&gt;0.05</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+</div>
+<div id="podemos-asegurar-que-no-existe-relacion-entre-el-barrio-y-la-cantidad-de-habitaciones" class="section level4">
+<h4>PODEMOS ASEGURAR QUE NO EXISTE RELACIÓN ENTRE EL BARRIO Y LA CANTIDAD DE HABITACIONES</h4>
+</div>
+<div id="veamos-si-existe-relacion-entre-el-precio-medio-del-alquiler-y-la-cantidad-de-crimenes-en-los-barrios" class="section level3">
+<h3>Veamos si existe relación entre el precio medio del alquiler y la cantidad de crímenes en los barrios:</h3>
+<div id="asumimos-que-son-muestras-independientes-de-dos-subpoblaciones-por-tanto-realizaremos-el-test-de-la-t-de-student.-justificamos-la-respuesta-tambien-con-un-grafico" class="section level4">
+<h4>Asumimos que son muestras independientes de dos subpoblaciones, por tanto realizaremos el test de la T de Student. Justificamos la respuesta también con un gráfico:</h4>
+<pre class="r"><code>t.test(datasummary$TotalCrimes,datasummary$AvgPrice)$p.value&gt;0.05</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+</div>
+<div id="para-hacer-el-grafico-tenemos-que-unir-en-un-nuevo-dataframe-todos-los-datos" class="section level4">
+<h4>Para hacer el gráfico tenemos que unir en un nuevo dataframe todos los datos</h4>
+<pre class="r"><code>ej3_ds&lt;-data.frame(datasummary$Borough,datasummary$TotalCrimes,datasummary$AvgValue)
+colnames(ej3_ds)=c(&quot;Borough&quot;,&quot;TotalCrimes&quot;,&quot;AvgPrice&quot;)
+graph2=ggplot(ej3_ds, aes(x = TotalCrimes, y = AvgPrice, color=Borough)) + geom_point()
+graph2</code></pre>
+<p><img src="index_files/figure-html/tts-1.png" width="672" /></p>
+</div>
+</div>
+<div id="representa-en-el-mapa-los-barrios-en-funcion-del-precio-y-el-numero-de-pisos" class="section level3">
+<h3>6. Representa en el mapa los barrios en función del precio y el numero de pisos</h3>
+<pre class="r"><code>lon=mean(airbnb$longitude)
+lati=mean(airbnb$latitude)
+
+mapLon = get_map(location = c(lon,lati), zoom = 11, maptype=&quot;roadmap&quot;)</code></pre>
+<pre><code>## Map from URL : http://maps.googleapis.com/maps/api/staticmap?center=51.510895,-0.127935&amp;zoom=11&amp;size=640x640&amp;scale=2&amp;maptype=roadmap&amp;language=en-EN&amp;sensor=false</code></pre>
+<pre class="r"><code>graph3 = mapPoints &lt;- ggmap(mapLon) +
+  geom_point(aes(x = Longitude, y = Latitude, colour= AvgPrice, size = sqrt(Flats)) , data = datasummary)
+ 
+graph3</code></pre>
+<p><img src="index_files/figure-html/boro-1.png" width="672" /></p>
+</div>
+<div id="representa-en-el-mapa-del-barrio-leyton-los-pisos-en-funcion-del-numero-de-habitaciones-y-el-precio" class="section level3">
+<h3>7. Representa en el mapa del barrio Leyton los pisos en funcion del numero de habitaciones y el precio</h3>
+<pre class="r"><code>neigh = &quot;Leyton&quot;
+a_neigh=airbnb[airbnb$neighborhood==neigh,]
+map_b=qmap(neigh, zoom = 15)</code></pre>
+<pre><code>## Map from URL : http://maps.googleapis.com/maps/api/staticmap?center=Leyton&amp;zoom=15&amp;size=640x640&amp;scale=2&amp;maptype=terrain&amp;language=en-EN&amp;sensor=false</code></pre>
+<pre><code>## Information from URL : http://maps.googleapis.com/maps/api/geocode/json?address=Leyton&amp;sensor=false</code></pre>
+<pre class="r"><code>graph4 = map_b+                                        
+  geom_point(aes(x = longitude, y = latitude, colour = factor(bathrooms), size=price), data = a_neigh, na.rm = T) +
+  facet_grid(~room_type)
+
+graph4</code></pre>
+<p><img src="index_files/figure-html/leyt-1.png" width="672" /></p>
+</div>
+<div id="haz-un-mapa-de-densidades-del-mapa-de-londres-en-funcion-del-numero-de-pisos-disponibles" class="section level3">
+<h3>8. Haz un mapa de densidades del mapa de Londres en funcion del numero de pisos disponibles</h3>
+<pre class="r"><code>london_den &lt;- get_map(location = &quot;London&quot;, zoom = 12, maptype = &quot;roadmap&quot;) </code></pre>
+<pre><code>## Map from URL : http://maps.googleapis.com/maps/api/staticmap?center=London&amp;zoom=12&amp;size=640x640&amp;scale=2&amp;maptype=roadmap&amp;language=en-EN&amp;sensor=false</code></pre>
+<pre><code>## Information from URL : http://maps.googleapis.com/maps/api/geocode/json?address=London&amp;sensor=false</code></pre>
+<pre class="r"><code>londonMap&lt;-ggmap(london_den)
+graph5 = londonMap +
+  stat_density2d(aes(x = longitude, y = latitude, fill = ..level..,alpha=..level..), bins = 10, geom = &quot;polygon&quot;, data = airbnb) +
+  scale_fill_gradient(low = &quot;black&quot;, high = &quot;red&quot;)+
+  ggtitle(&quot;Map of density in London&quot;)
+graph5</code></pre>
+<p><img src="index_files/figure-html/map-1.png" width="672" /></p>
+</div>
+<div id="haz-un-grafico-de-tartas-de-el-tipo-de-crimenes-cometidos-en-camden" class="section level3">
+<h3>9. Haz un grafico de tartas de el tipo de crimenes cometidos en Camden</h3>
+<pre class="r"><code>slice_data &lt;- data.frame(table(crimedata[crimedata$borough==&quot;Camden&quot;,]$major_category))
+colnames(slice_data)=c(&quot;Type&quot;, &quot;Frequency&quot;)
+graph6 = pie3D(slice_data[,2],labels=slice_data[,1],explode=0.1,
+      main=&quot;Pie Chart of Major Crimes in Camden&quot;)</code></pre>
+<p><img src="index_files/figure-html/PieC-1.png" width="672" /></p>
+<pre class="r"><code>graph6</code></pre>
+<pre><code>## [1] 0.2310945 0.9284182 1.6806874 2.0459137 2.3230656 2.7602059 3.0220053
+## [8] 3.9698160 5.5890937</code></pre>
+</div>
+</div>
+<div id="haz-un-histograma-3d" class="section level2">
+<h2>10. Haz un histograma 3D</h2>
+<pre class="r"><code>data_3d = data.frame(table(airbnb$room_type, airbnb$overall_satisfaction))
+colnames(data_3d)=c(&quot;Type&quot;, &quot;Valoration&quot;, &quot;Frequency&quot;)
+data_3d=acast(data_3d,Valoration~Type)</code></pre>
+<pre><code>## Using Frequency as value column: use value.var to override.</code></pre>
+<pre class="r"><code>#Quito la columna que no tiene tipo
+data_3d=data_3d[,c(4,3,2)]
+#Junto los que son menores que 3.5
+data_3d_vec=as.numeric(rownames(data_3d))&lt;=3.5
+data_3d_aux=c()
+
+for (i in 1:ncol(data_3d)){
+  data_3d_aux[i]=sum(data_3d[data_3d_vec,i])
+}
+data_3d=rbind(data_3d_aux,data_3d[data_3d_vec==F,])
+rownames(data_3d)=c(3.5,4,4.5,5)
+colnames(data_3d)=c(&quot;Shared&quot;,&quot;Private&quot;,&quot;Entire&quot;)
+
+hist3D (x = 1:nrow(data_3d), y = 1:ncol(data_3d), z = data_3d,
+        bty = &quot;g&quot;, phi = 20,  theta = -60, scale = T, 
+        xlab = &quot;Valoration&quot;, ylab = &quot;Type&quot;, zlab = &quot;Frequency&quot;, main = &quot;Valoration VS Type&quot;,
+        breaks=c(0,1000,2000,3000,4000,5000,6000), border = &quot;white&quot;, shade = 0.3,
+        ticktype = &quot;detailed&quot;, space = 0.15, d = 2, cex.axis = 1e-9, opaque.top = F)
+
+text3D(x = 1:nrow(data_3d), y = rep(0.5, nrow(data_3d)), z = rep(3, 4),
+       labels = rownames(data_3d),
+       add = T, adj = 0)
+
+text3D(x = rep(1, ncol(data_3d)),   y = 1:ncol(data_3d), z = rep(0, ncol(data_3d)),
+       labels  = colnames(data_3d), phi = 20, theta = 20, bty=&quot;g&quot;, width=2,  col.axis = &quot;red&quot;,
+       add = TRUE, adj = 1)</code></pre>
+<p><img src="index_files/figure-html/3d-1.png" width="672" /></p>
 </div>
 
 

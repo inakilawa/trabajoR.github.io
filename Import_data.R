@@ -255,11 +255,11 @@ pie3D(data_3d[,2],labels=row.names(data_3d),explode=0.1,
 #### 10. Haz un histograma 3D
 
 
-data_3d = data.frame(table(airbnb$room_type, airbnb$overall_satisfaction))
+data_3d<-data.frame(table(airbnb$room_type, airbnb$overall_satisfaction))
 colnames(data_3d)=c("Type", "Valoration", "Frequency")
-data_3d=acast(data_3d,Valoration~Type)
+data_3d<-acast(data_3d,Valoration~Type)
 #Quito la columna que no tiene tipo
-data_3d=data_3d[,c(4,3,2)]
+data_3d<-data_3d[,c(4,3,2)]
 #Junto los que son menores que 3.5
 data_3d_vec=as.numeric(rownames(data_3d))<=3.5
 data_3d_aux=c()
